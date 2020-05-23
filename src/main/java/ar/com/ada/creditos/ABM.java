@@ -1,5 +1,7 @@
 package ar.com.ada.creditos;
 
+import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
 
@@ -96,6 +98,15 @@ public class ABM {
         if (domAlternativo != null)
             cliente.setDomicilioAlternativo(domAlternativo);
 
+        Prestamo prestamo = new Prestamo();
+        BigDecimal importePrestamo = new BigDecimal(5000);
+        prestamo.setImporte(importePrestamo); //forma 1
+        prestamo.setFecha(new Date());
+        prestamo.setFechaAlta(new Date());
+        prestamo.setCuotas(10);
+        prestamo.setCliente(cliente);
+
+        
         ABMCliente.create(cliente);
 
         /*
