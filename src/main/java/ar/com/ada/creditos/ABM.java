@@ -1,6 +1,9 @@
 package ar.com.ada.creditos;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
@@ -55,7 +58,13 @@ public class ABM {
                     case 5:
                         listarPorNombre();
                         break;
-
+                    case 6:
+                    cargarPrestamo();
+                        break;
+                        case 7:
+                       // listarPrestamo(); esta version recorre por prestamo y la siguiente por cliente
+                       listarPrestamoPorCliente();
+                        break;
                     default:
                         System.out.println("La opcion no es correcta.");
                         break;
@@ -100,13 +109,12 @@ public class ABM {
 
         Prestamo prestamo = new Prestamo();
         BigDecimal importePrestamo = new BigDecimal(5000);
-        prestamo.setImporte(importePrestamo); //forma 1
+        prestamo.setImporte(importePrestamo); // forma 1
         prestamo.setFecha(new Date());
         prestamo.setFechaAlta(new Date());
         prestamo.setCuotas(10);
         prestamo.setCliente(cliente);
 
-        
         ABMCliente.create(cliente);
 
         /*
@@ -243,14 +251,52 @@ public class ABM {
 
     public void mostrarCliente(Cliente cliente) {
 
-        System.out.print("Id: " + cliente.getClienteId() + " Nombre: " + cliente.getNombre()
-        + " DNI: " + cliente.getDni()
-        + " Domicilio: " + cliente.getDomicilio());
+        System.out.print("Id: " + cliente.getClienteId() + " Nombre: " + cliente.getNombre() + " DNI: "
+                + cliente.getDni() + " Domicilio: " + cliente.getDomicilio());
 
         if (cliente.getDomicilioAlternativo() != null)
             System.out.println(" Alternativo: " + cliente.getDomicilioAlternativo());
         else
             System.out.println();
+    }
+    // -------------------------------------------
+
+    // desde aca van las opciones de listar prestamos y otorgar nuevos
+
+    public void agregarPrestamoCliente() {
+
+        System.out.println("Ingrese su cliente ID ");
+        int clienteId = Teclado.nextInt();
+        Cliente cl = ABMCliente.read(clienteId);
+        if (cl == null) {
+            System.out.println("cliente no existe");
+            return;
+        }
+
+        Prestamo p = new Prestamo();
+        System.out.println("Ingrese el monto");
+        p.setImporte(Teclado.nextBigDecimal());
+        p.setCliente(cl);
+        System.out.println("ingrese las cuotas");
+        p.setCuotas(Teclado.nextInt());
+        System.out.println("ingrese la fecha");
+        String time = Teclado.next();
+        // LocalDate lt = LocalDate.parse(time);
+        // lt.atStartOfDay(ZoneId.systemDefault()).toInstant();
+        String expectedPattern = "dd/mm/yyyy";
+
+        SimpleDateFormat formatter = new SimpleDateFormat(expectedPattern);
+        try {
+            Date fecha = formatter.parse(Teclado.nextLine());
+            p.setFecha(fecha);
+
+        } catch (ParseException e) {
+            System.out.println("error en la fecha");
+            return;
+        }
+        p.setFechaAlta(new Date());
+        ABMPrestamo.create(p);
+
     }
 
     public static void printOpciones() {
@@ -264,5 +310,32 @@ public class ABM {
         System.out.println("0. Para terminar.");
         System.out.println("");
         System.out.println("=======================================");
+    }
+
+
+    public void listarPrestamo(){
+        List<Prestamo> todos = ABMPrestamo.buscarTodos();
+        for(Prestamo p : todos){
+            mostrarPrestamo(p);
+        }
+    }
+
+    private void mostrarPrestamo(Prestamo p) {
+        System.out.println("id: " + p.getPrestamoId() + " Cliente " + p.getCliente().getNombre() + " Importe: " + p.getCuotas() + " fecha de alta " + p.getFechaAlta());
+    }
+
+    
+    public void listarPrestamoPorCliente(){
+        List<Cliente> todos = ABMCliente.buscarTodos();
+        for(Cliente cliente : todos){
+            mostrarPrestamo(cliente);
+        }
+    }
+
+    private void mostrarPrestamo(Cliente cliente) {
+        for (Prestamo p : cliente.getPrestamos()) {
+            mostrarPrestamo(p);
+            
+        }
     }
 }

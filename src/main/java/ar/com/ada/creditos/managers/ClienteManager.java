@@ -125,9 +125,20 @@ public class ClienteManager {
         // Deberia traer solo aquella del nombre y con esto demostrarmos que trae todas
         // si pasamos
         // como nombre: "' or '1'='1"
+        // Forma 1: NO hacer JAMAS
         Query query = session.createNativeQuery("SELECT * FROM cliente where nombre = '" + nombre + "'", Cliente.class);
 
-        List<Cliente> clientes = query.getResultList();
+        // Forma2: usando SQL con parametros
+        Query querySQLConParametros = session.createNativeQuery("SELECT * FROM cliente where nombre = ? ",
+                Cliente.class);
+        querySQLConParametros.setParameter(1, nombre);
+
+        // Forma3: usando JPQL con parametros con NOMBRE
+        Query queryJPQLConParametros = session.createQuery("SELECT c FROM Cliente c where c.nombre = :nombreFiltro",
+                Cliente.class);
+        queryJPQLConParametros.setParameter("nombreFiltro", nombre);
+
+        List<Cliente> clientes = queryJPQLConParametros.getResultList();
 
         return clientes;
 
